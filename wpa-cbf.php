@@ -11,100 +11,110 @@ Author URI: https://wpcrawl.com
 
 
 function wpa_get_random_string(){
-	$permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-	return substr( str_shuffle( $permitted_chars ), 0, 5 );
+  $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+  return substr( str_shuffle( $permitted_chars ), 0, 5 );
 }
 
 global $wpa_cbf;
 $wpa_cbf = new WPA_Cache_Bot_Feed();
 class WPA_Cache_Bot_Feed {
-	
-	function __construct() {
+  
+  function __construct() {
 
-		$this->settings_key = 'wpa-cbf';
-		$this->version = '1.0';
-		$this->options_page = 'wpa-cbf-options';
-		$this->options_title = 'WPCrawl - Crawl Feed Settings';
-		$this->menu_label = 'WPCrawl Feed Settings';
+    $this->settings_key = 'wpa-cbf';
+    $this->version = '1.0';
+    $this->options_page = 'wpa-cbf-options';
+    $this->options_title = 'WPCrawl - Crawl Feed Settings';
+    $this->menu_label = 'WPCrawl Feed Settings';
 
-		$this->options = array(
-			array(
-				"name" => "labels",
-				"label" => __("General Settings"),
-				"type" => "section"
-			),
-			array( "type" => "open" ),
-			array(
-				'type' 	=> 'text',
-				'id' 		=> 'page-url',
-				'name'	=> 'Page URL',
-				'default' => wpa_get_random_string()
-			),
-			array(
-				'type'	=> 'number',
-				'id'		=> 'max-items',
-				'name'	=> 'Max Items',
-				'default' => 200
-			),
+    $this->options = array(
       array(
-        'type'	=> 'checkbox',
-        'id'		=> 'crawl-images',
-        'name'	=> 'Crawl featured images',
+        "name" => "labels",
+        "label" => __("General Settings"),
+        "type" => "section"
+      ),
+      array( "type" => "open" ),
+      array(
+        'type'   => 'text',
+        'id'     => 'page-url',
+        'name'  => 'Page URL',
+        'default' => wpa_get_random_string()
+      ),
+      array(
+        'type'  => 'number',
+        'id'    => 'max-items',
+        'name'  => 'Max Items',
+        'default' => 200
+      ),
+      array(
+        'type'  => 'checkbox',
+        'id'    => 'crawl-images',
+        'name'  => 'Crawl featured images',
         'default' => 'on'
       ),
       array(
-        'type'	=> 'checkbox',
-        'id'		=> 'crawl-amp',
-        'name'	=> 'Crawl AMP versions',
+        'type'  => 'checkbox',
+        'id'    => 'crawl-amp',
+        'name'  => 'Crawl AMP versions',
         'default' => 'off'
       ),
-			array( "type" => "close" ),
-		);
+      array( "type" => "close" ),
+    );
 
-		add_action( 'template_redirect', array(&$this, 'template_redirect') );
+    add_action( 'template_redirect', array(&$this, 'template_redirect'), 1 );
 
-		add_action( 'admin_menu', array(&$this, 'admin_header') );
-	}
+    add_action( 'admin_menu', array(&$this, 'admin_header') );
+  }
 
-	function template_redirect() {
-		global $wpa_cbf;
-		global $wp_query;
-		
-		$cbf_page = $this->get_plugin_setting( 'page-url' );
+  function template_redirect() {
+    global $wpa_cbf;
+    global $wp_query;
 
-		if ( $cbf_page && $wp_query->query_vars['name'] !== $cbf_page )
-			return;
+    if ( !$wp_query ) return;
+
+    $cbf_page = $this->get_plugin_setting( 'page-url' );
+    if( !$cbf_page || '' === $cbf_page ) return;
+
+    $page_slug = $wp_query->query_vars['name'];
+    $permalink_structure = get_option( 'permalink_structure' );
+    if( '/%category%/%postname%/' === $permalink_structure ){
+      $page_slug = $wp_query->query_vars['category_name'];
+    }
+
+    if ( !$page_slug ) return;
+
+    if ( $page_slug !== $cbf_page ) return;
 
     if ( $wp_query->is_404 ) {
       $wp_query->is_404 = false;
     }
 
-		// include custom template
-		include dirname( __FILE__ ) . '/cache-feed.php';
-		exit;
-	}
-			
-	function options_page(){
+    // include custom template
+    include dirname( __FILE__ ) . '/cache-feed.php';
+    exit;
+  }
+      
+  function options_page(){
 
-		$title = $this->options_title;
+    $title = $this->options_title;
 
-		$messages = array(
-			"1" => __("Settings are saved.", 'wpa-cbf' ),
-			"2" => __("Settings are reset.", 'wpa-cbf' )
-		);
-		
-		$options = $this->options;
-		$current = $this->get_plugin_settings();
+    $messages = array(
+      "1" => __("Settings are saved.", 'wpa-cbf' ),
+      "2" => __("Settings are reset.", 'wpa-cbf' )
+    );
+    
+    $options = $this->options;
+    $current = $this->get_plugin_settings();
 
-		include_once( "wpa-cbf-options-page.php" );
+    include_once( "wpa-cbf-options-page.php" );
 
-	}
-	
-	function enqueue_styles(){
-		wp_enqueue_style( "wpa-options", plugins_url( '/options.css' , __FILE__ ) , false, null, "all");
-	}
-	
-	function admin_header( $instance ){
+  }
+  
+  function enqueue_styles(){
+    wp_enqueue_style( "wpa-options", plugins_url( '/options.css' , __FILE__ ) , false, null, "all");
+  }
+  
+  function admin_header( $instance ){
     if( !wp_doing_ajax() ){
 
       /* If we are on options page */
@@ -146,17 +156,17 @@ class WPA_Cache_Bot_Feed {
 
       }
 
-			$page = add_options_page(
-				$this->options_title,
-				$this->menu_label,
-				'manage_options',
-				$this->options_page,
-				array(&$this, 'options_page')
-			);
+      $page = add_options_page(
+        $this->options_title,
+        $this->menu_label,
+        'manage_options',
+        $this->options_page,
+        array(&$this, 'options_page')
+      );
     }
   }
 
-	function get_plugin_settings(){
+  function get_plugin_settings(){
     $settings = get_option( $this->settings_key );
 
     if(FALSE === $settings){
