@@ -1,10 +1,10 @@
 <?php
 
 /*
-Plugin Name: WPCrawl - Cache Bot Feed
+Plugin Name: WPCrawl Feeder
 Plugin URI: https://wpcrawl.com/plugin
 Description: Official WPCrawl plugin to create a crawl feed for WPCrawl external wordpress crawler. Read more on <a href="https://wpcrawl.com/" target="_blank" rel="noopener noreferrer">WPCrawl</a>.
-Version: 1.0
+Version: 1.0.2
 Author: WPCrawl
 Author URI: https://wpcrawl.com
 */
@@ -24,8 +24,8 @@ class WPA_Cache_Bot_Feed {
     $this->settings_key = 'wpa-cbf';
     $this->version = '1.0';
     $this->options_page = 'wpa-cbf-options';
-    $this->options_title = 'WPCrawl - Crawl Feed Settings';
-    $this->menu_label = 'WPCrawl Feed Settings';
+    $this->options_title = 'WPCrawl Feeder Settings';
+    $this->menu_label = 'WPCrawl Feeder';
 
     $this->options = array(
       array(
