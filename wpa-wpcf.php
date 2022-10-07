@@ -113,7 +113,7 @@ class WPCrawl_Feeder {
   }
   
   function enqueue_styles(){
-    wp_enqueue_style( "wpa-options", plugins_url( '/options.css' , __FILE__ ) , false, null, "all");
+    wp_enqueue_style( "wpcf-options", plugins_url( '/options.css' , __FILE__ ) , false, null, "all");
   }
   
   function admin_header( $instance ){
