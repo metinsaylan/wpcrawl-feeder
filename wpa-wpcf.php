@@ -9,21 +9,22 @@ Author: WPCrawl
 Author URI: https://wpcrawl.com
 */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
 
-function wpa_get_random_string(){
+function wpa_wpcf_get_random_string(){
   $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
   return substr( str_shuffle( $permitted_chars ), 0, 5 );
 }
 
-global $wpa_cbf;
-$wpa_cbf = new WPA_Cache_Bot_Feed();
-class WPA_Cache_Bot_Feed {
+global $wpa_wpcf;
+$wpa_wpcf = new WPCrawl_Feeder();
+class WPCrawl_Feeder {
   
   function __construct() {
 
-    $this->settings_key = 'wpa-cbf';
+    $this->settings_key = 'wpa-wpcf';
     $this->version = '1.0';
-    $this->options_page = 'wpa-cbf-options';
+    $this->options_page = 'wpa-wpcf-options';
     $this->options_title = 'WPCrawl Feeder Settings';
     $this->menu_label = 'WPCrawl Feeder';
 
@@ -38,7 +39,7 @@ class WPA_Cache_Bot_Feed {
         'type'   => 'text',
         'id'     => 'page-url',
         'name'  => 'Page URL',
-        'default' => wpa_get_random_string()
+        'default' => wpa_wpcf_get_random_string()
       ),
       array(
         'type'  => 'number',
@@ -64,16 +65,17 @@ class WPA_Cache_Bot_Feed {
     add_action( 'template_redirect', array(&$this, 'template_redirect'), 1 );
 
     add_action( 'admin_menu', array(&$this, 'admin_header') );
+    add_filter( 'plugin_action_links_' . plugin_basename(__FILE__),  array(&$this, 'insert_settings_link') );
   }
 
   function template_redirect() {
-    global $wpa_cbf;
+    global $wpa_wpcf;
     global $wp_query;
 
     if ( !$wp_query ) return;
 
-    $cbf_page = $this->get_plugin_setting( 'page-url' );
-    if( !$cbf_page || '' === $cbf_page ) return;
+    $wpcf_page = $this->get_plugin_setting( 'page-url' );
+    if( !$wpcf_page || '' === $wpcf_page ) return;
 
     $page_slug = $wp_query->query_vars['name'];
     $permalink_structure = get_option( 'permalink_structure' );
@@ -83,7 +85,7 @@ class WPA_Cache_Bot_Feed {
 
     if ( !$page_slug ) return;
 
-    if ( $page_slug !== $cbf_page ) return;
+    if ( $page_slug !== $wpcf_page ) return;
 
     if ( $wp_query->is_404 ) {
       $wp_query->is_404 = false;
@@ -99,14 +101,14 @@ class WPA_Cache_Bot_Feed {
     $title = $this->options_title;
 
     $messages = array(
-      "1" => __("Settings are saved.", 'wpa-cbf' ),
-      "2" => __("Settings are reset.", 'wpa-cbf' )
+      "1" => __("Settings are saved.", 'wpa-wpcf' ),
+      "2" => __("Settings are reset.", 'wpa-wpcf' )
     );
     
     $options = $this->options;
     $current = $this->get_plugin_settings();
 
-    include_once( "wpa-cbf-options-page.php" );
+    include_once( "wpa-wpcf-options-page.php" );
 
   }
   
@@ -133,7 +135,7 @@ class WPA_Cache_Bot_Feed {
               if( $option['type'] == 'checkbox' && empty( $_REQUEST[ $option['id'] ] ) ) {
                 $settings[ $option['id'] ] = 'off';
               } elseif( array_key_exists( $option['id'], $_REQUEST ) ) {
-                $settings[ $option['id'] ] = $_REQUEST[ $option['id'] ];
+                $settings[ $option['id'] ] = sanitize_text_field( $_REQUEST[ $option['id'] ] );
               } else {
                 // hmm no key here?
               }
@@ -231,5 +233,22 @@ class WPA_Cache_Bot_Feed {
 
     update_option( $this->settings_key, $current_settings );
     return $current_settings;
+  }
+
+  function insert_settings_link( $links ){
+    $url = esc_url( add_query_arg(
+      'page',
+      $this->options_page,
+      get_admin_url() . 'admin.php'
+    ) );
+
+    $settings_link = "<a href='$url'>" . __( 'Settings' ) . '</a>';
+
+    array_unshift(
+      $links,
+      $settings_link
+    );
+
+    return $links;
   }
 }
