@@ -121,6 +121,8 @@ class WPCrawl_Feeder {
   function admin_header( $instance ){
     if( !wp_doing_ajax() ){
 
+      if( !array_key_exists( 'page', $_GET ) ) return;
+
       /* If we are on options page */
       if ( @$_GET['page'] == $this->options_page ) {
 
