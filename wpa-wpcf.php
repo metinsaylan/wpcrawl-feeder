@@ -121,6 +121,14 @@ class WPCrawl_Feeder {
   function admin_header( $instance ){
     if( !wp_doing_ajax() ){
 
+      $page = add_options_page(
+        $this->options_title,
+        $this->menu_label,
+        'manage_options',
+        $this->options_page,
+        array(&$this, 'options_page')
+      );
+
       if( !array_key_exists( 'page', $_GET ) ) return;
 
       /* If we are on options page */
@@ -162,13 +170,6 @@ class WPCrawl_Feeder {
 
       }
 
-      $page = add_options_page(
-        $this->options_title,
-        $this->menu_label,
-        'manage_options',
-        $this->options_page,
-        array(&$this, 'options_page')
-      );
     }
   }
 
