@@ -19,7 +19,7 @@ function wpa_wpcf_get_random_string(){
 global $wpa_wpcf;
 $wpa_wpcf = new WPCrawl_Feeder();
 class WPCrawl_Feeder {
-  
+
   function __construct() {
 
     $this->settings_key = 'wpa-wpcf';
@@ -62,20 +62,22 @@ class WPCrawl_Feeder {
       array( "type" => "close" ),
     );
 
-    add_action( 'template_redirect', array(&$this, 'template_redirect'), 1 );
+    add_action( 'template_include', array(&$this, 'template_include'), 1 );
 
     add_action( 'admin_menu', array(&$this, 'admin_header') );
     add_filter( 'plugin_action_links_' . plugin_basename(__FILE__),  array(&$this, 'insert_settings_link') );
   }
 
-  function template_redirect() {
+
+  function template_include( $original_template ) {
+
     global $wpa_wpcf;
     global $wp_query;
 
-    if ( !$wp_query ) return;
+    if ( !$wp_query ) return $original_template ;
 
     $wpcf_page = $this->get_plugin_setting( 'page-url' );
-    if( !$wpcf_page || '' === $wpcf_page ) return;
+    if( !$wpcf_page || '' === $wpcf_page ) return $original_template;
 
     $page_slug = $wp_query->query_vars['name'];
     $permalink_structure = get_option( 'permalink_structure' );
@@ -83,19 +85,19 @@ class WPCrawl_Feeder {
       $page_slug = $wp_query->query_vars['category_name'];
     }
 
-    if ( !$page_slug ) return;
+    if ( !$page_slug ) return $original_template;
 
-    if ( $page_slug !== $wpcf_page ) return;
+    if ( $page_slug !== $wpcf_page ) return $original_template;
 
     if ( $wp_query->is_404 ) {
       $wp_query->is_404 = false;
     }
 
     // include custom template
-    include dirname( __FILE__ ) . '/cache-feed.php';
-    exit;
+    return dirname( __FILE__ ) . '/cache-feed.php';
+
   }
-      
+
   function options_page(){
 
     $title = $this->options_title;
@@ -104,18 +106,18 @@ class WPCrawl_Feeder {
       "1" => __("Settings are saved.", 'wpa-wpcf' ),
       "2" => __("Settings are reset.", 'wpa-wpcf' )
     );
-    
+
     $options = $this->options;
     $current = $this->get_plugin_settings();
 
     include_once( "wpa-wpcf-options-page.php" );
 
   }
-  
+
   function enqueue_styles(){
     wp_enqueue_style( "wpcf-options", plugins_url( '/options.css' , __FILE__ ) , false, null, "all");
   }
-  
+
   function admin_header( $instance ){
     if( !wp_doing_ajax() ){
 
