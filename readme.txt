@@ -3,7 +3,7 @@ Contributors: mattsay
 Tags: crawl, feed, crawler, cache, seo, speed, external, service
 Requires at least: 5.0
 Tested up to: 6.0.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 
 Official WPCrawl plugin to create a crawl feed for WPCrawl external wordpress crawler. Read more on <a href="https://wpcrawl.com/" target="_blank" rel="noopener noreferrer">WPCrawl</a>.
@@ -25,6 +25,9 @@ Use plugin search or upload plugin zip file to your server using "Plugins" "Add 
 Activate and visit Settings page to make necessary adjustments. Save plugin settings.
 
 == Changelog ==
+
+= 1.0.3 =
+* Fixes and updates for WordPress.org
 
 = 1.0.2 =
 *Release Date - 1 September 2022*
